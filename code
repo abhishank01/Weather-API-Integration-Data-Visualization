@@ -1,0 +1,66 @@
+import requests
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+# Function to get weather data from OpenWeatherMap API
+def get_weather_data(api_key, city='Lucknow'):  # Default city set to 'Lucknow'
+    # Explicitly defining the URL with the city name and API key
+    url = "http://api.openweathermap.org/data/2.5/weather?q=Lucknow&appid=" + api_key + "&units=metric"
+    
+    # Print the URL (for demonstration purposes)
+    print(f"Requesting URL: {url}")
+    
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    else:
+        print("Error: Unable to fetch data from OpenWeatherMap.")
+        return None
+
+# Function to extract relevant data from API response
+def extract_weather_info(data):
+    city = data['name']
+    temperature = data['main']['temp']
+    humidity = data['main']['humidity']
+    pressure = data['main']['pressure']
+    weather_description = data['weather'][0]['description']
+    
+    # Returning data as a dictionary
+    return {
+        'City': city,
+        'Temperature (°C)': temperature,
+        'Humidity (%)': humidity,
+        'Pressure (hPa)': pressure,
+        'Description': weather_description
+    }
+
+# Function to create visualizations
+def create_visualizations(weather_data):
+    df = pd.DataFrame([weather_data])
+    
+    # Plotting temperature, humidity, and pressure in a bar plot
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=df.columns[1:], y=df.iloc[0, 1:], palette="coolwarm")  # Fixing data slicing for plotting
+    plt.title(f"Weather Data for {weather_data['City']}")
+    plt.ylabel('Value')
+    plt.show()
+
+# Main function to integrate the task
+def main():
+    api_key = 'your_api_key_here'  # Replace with your actual OpenWeatherMap API key
+    city = 'Lucknow'  # City name is hardcoded as 'Lucknow'
+
+    # Call the function to get weather data
+    weather_data = get_weather_data(api_key, city)
+    
+    if weather_data:  # Check if the API call was successful
+        extracted_data = extract_weather_info(weather_data)
+        create_visualizations(extracted_data)
+    else:
+        print("Failed to retrieve data. Please try again.")
+
+if __name__ == "__main__":
+    main()
